@@ -38,9 +38,10 @@ class users(db.Model):
     hash = db.Column("hash", db.String(200), nullable=False)
     stocks = db.Column("stocks", db.PickleType, nullable=True)
 
-    def __init__(self, username, hash):
+    def __init__(self, username, hash, stocks):
         self.username = username
         self.hash = hash
+        self.stocks = stocks
 
 
 with app.app_context():
@@ -48,19 +49,6 @@ with app.app_context():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
-
-stock_list = {}
-
-
-# saves query of stocks
-@app.before_request
-def stock_query():
-    stock_list = requests.get(
-        "https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks/2023-05-10?adjusted=true&apiKey=YuCUc9xPrsUFwddoEubn0vpNb2glg2ro"
-    )
-    stock_list = stock_list.json()
-    print(stock_list)
-    print(type(stock_list["results"]))
 
 
 @app.after_request
@@ -72,9 +60,20 @@ def after_request(response):
     return response
 
 
+global stock_list
+stock_list = {}
+
+
 @app.route("/")
 @login_required
 def index():
+    global stock_list
+    if not stock_list:
+        stock_list = requests.get(
+            "https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks/2023-05-10?adjusted=true&apiKey=YuCUc9xPrsUFwddoEubn0vpNb2glg2ro"
+        )
+        stock_list = stock_list.json()
+    print(stock_list)
     return render_template("index.html")
 
 
@@ -82,10 +81,11 @@ def index():
 @login_required
 def add():
     if request.method == "GET":
-        print(stock_list)
         return render_template("add.html")
 
     else:
+        found = False
+        print((stock_list["results"]))
         entered_stock = request.form.get("stock")
         for data in stock_list["results"]:
             if data["T"] == entered_stock:
@@ -315,7 +315,8 @@ def register():
             password = generate_password_hash(
                 password, method="pbkdf2:sha1", salt_length=8
             )
-            user = users(form_username, password)
+            stocks = []
+            user = users(form_username, password, stocks)
             db.session.add(user)
             db.session.commit()
             flash("successful registration")
