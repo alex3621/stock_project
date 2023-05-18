@@ -36,6 +36,7 @@ class users(db.Model):
     id = db.Column("id", db.Integer, primary_key=True)
     username = db.Column("username", db.String(100), nullable=False)
     hash = db.Column("hash", db.String(200), nullable=False)
+    stocks = db.Column("stocks", db.PickleType, nullable=True)
 
     def __init__(self, username, hash):
         self.username = username
@@ -51,12 +52,15 @@ if __name__ == "__main__":
 stock_list = {}
 
 
+# saves query of stocks
 @app.before_request
 def stock_query():
     stock_list = requests.get(
         "https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks/2023-05-10?adjusted=true&apiKey=YuCUc9xPrsUFwddoEubn0vpNb2glg2ro"
     )
     stock_list = stock_list.json()
+    print(stock_list)
+    print(type(stock_list["results"]))
 
 
 @app.after_request
@@ -71,9 +75,35 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    return render_template(
-        "index.html",
-    )
+    return render_template("index.html")
+
+
+@app.route("/add", methods=["GET", "POST"])
+@login_required
+def add():
+    if request.method == "GET":
+        print(stock_list)
+        return render_template("add.html")
+
+    else:
+        entered_stock = request.form.get("stock")
+        for data in stock_list["results"]:
+            if data["T"] == entered_stock:
+                found = True
+        if not entered_stock:
+            return apology("no symbols entered")
+        elif not found:
+            return apology("no match found with the entered symtol")
+        else:
+            flash("successfully added Stock")
+            return redirect("/")
+
+
+@app.route("/remove", methods=["GET", "POST"])
+@login_required
+def remove():
+    if request.method == "GET":
+        return render_template("remove.html")
 
 
 @app.route("/buy", methods=["GET", "POST"])
