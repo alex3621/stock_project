@@ -108,6 +108,24 @@ def add():
 def remove():
     if request.method == "GET":
         return render_template("remove.html")
+    else:
+        entered_stock = request.form.get("stock")
+        user_id = session["user_id"]
+        userStockList = users.query.filter_by(id=user_id).first().stocks
+        if not entered_stock:
+            flash("No symbols entered")
+            return redirect("/remove")            
+        elif entered_stock not in userStockList:
+            flash("No match found in your profile with the given symbol")
+            return redirect("/remove")   
+        else:
+            userStockList.remove(entered_stock)
+            users.query.filter_by(id=user_id).first().stocks = userStockList
+            db.session.commit()
+            print(users.query.filter_by(id=user_id).first().stocks)
+            flash("Successfully removed entered stock")
+            return redirect("/remove")   
+
 
 
 @app.route("/buy", methods=["GET", "POST"])
