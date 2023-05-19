@@ -3,6 +3,22 @@
 
 {% block main %}
     <div class="stocks">
-        <p>to be completed</p>
+        <h2>User's stocks</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stock Symbol</th>
+                    <th>Stock Weighted Average Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in result %}
+                <tr>
+                    <td>{{ stock.T }}</td>
+                    <td>{{ stock.vw}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

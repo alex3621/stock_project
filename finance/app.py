@@ -73,7 +73,15 @@ def index():
     if not stock_list:
         stock_list = requests.get(os.getenv("POLYGON_API_KEY"))
         stock_list = stock_list.json()
-    return render_template("index.html")
+        stock_list=stock_list['results']
+    user_id = session["user_id"]
+    userStockList = users.query.filter_by(id=user_id).first().stocks
+    result=[]
+    print(stock_list)
+    for stock in stock_list:
+        if stock['T'] in userStockList:
+            result.append(stock)
+    return render_template("index.html", result=result)
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -85,7 +93,7 @@ def add():
     else:
         found = False
         entered_stock = request.form.get("stock")
-        for data in stock_list["results"]:
+        for data in stock_list:
             if data["T"] == entered_stock:
                 found = True
         if not entered_stock:
