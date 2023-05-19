@@ -81,7 +81,6 @@ def add():
 
     else:
         found = False
-        print((stock_list["results"]))
         entered_stock = request.form.get("stock")
         for data in stock_list["results"]:
             if data["T"] == entered_stock:
@@ -92,15 +91,16 @@ def add():
             return apology("no match found with the entered symtol")
         else:
             user_id = session["user_id"]
-            print(user_id)
-            flash("successfully added Stock")
             userStockList = users.query.filter_by(id=user_id).first().stocks
-            print(userStockList)
-            userStockList.append(entered_stock)
-            users.query.filter_by(id=user_id).first().stocks = userStockList
-            db.session.commit()
-            print(users.query.filter_by(id=user_id).first().stocks)
-            return redirect("/")
+            if entered_stock in userStockList:
+                flash("Enetered stock already inside your profile")
+                return redirect("add")
+            else:
+                userStockList.append(entered_stock)
+                users.query.filter_by(id=user_id).first().stocks = userStockList
+                db.session.commit()
+                flash("successfully added stock to your profile")
+                return redirect("/")
 
 
 @app.route("/remove", methods=["GET", "POST"])
