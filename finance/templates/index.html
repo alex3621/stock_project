@@ -2,13 +2,15 @@
 
 
 {% block main %}
-    <div class="stocks">
-        <h2>User's stocks</h2>
-        <table>
+    <div>
+        <h2 class="fs-2">Dashboard</h2>
+        <table class="table">
             <thead>
-                <tr>
+                <tr >
                     <th>Stock Symbol</th>
                     <th>Stock Weighted Average Price</th>
+                    <th>Closing Price</th>
+                    <th>Highest Price</th>
                 </tr>
             </thead>
             <tbody>
@@ -16,6 +18,8 @@
                 <tr>
                     <td>{{ stock.T }}</td>
                     <td>{{ stock.vw}}</td>
+                    <td>{{ stock.c}}</td>
+                    <td>{{ stock.h}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
