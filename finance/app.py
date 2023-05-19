@@ -8,6 +8,9 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from helpers import apology, login_required, lookup, usd
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # Configure application
@@ -68,7 +71,7 @@ stock_list = {}
 def index():
     global stock_list
     if not stock_list:
-        stock_list = requests.get("https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks/2023-05-10?adjusted=true&apiKey=YuCUc9xPrsUFwddoEubn0vpNb2glg2ro")
+        stock_list = requests.get(os.getenv("POLYGON_API_KEY"))
         stock_list = stock_list.json()
     return render_template("index.html")
 
